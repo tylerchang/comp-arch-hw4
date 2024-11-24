@@ -2,6 +2,25 @@
 #include <stdlib.h>
 #include <stdint.h> 
 
+/* Fill in the array with random numbers */
+void populate_array(uint32_t *arr, size_t size) {
+    
+    for (int i = 0; i < size; i++) {
+        arr[i] = size - i;
+    }
+}
+
+/* Print out array */
+void print_array(uint32_t *arr, size_t size, char message[]) {
+    
+    printf("%s", message);
+    printf("[");
+    for (int i = 0; i < size; i++) {
+        printf("%d,", arr[i]);
+    }
+    printf("]\n");
+}
+
 // Helper function to merge two sorted subarrays
 void merge(uint32_t *arr, size_t left, size_t mid, size_t right) {
 
@@ -69,36 +88,59 @@ void merge_sort(uint32_t *arr, size_t left, size_t right) {
     }
 }
 
+
+int partition (uint32_t *arr, size_t low, size_t high) {
+    
+    size_t pivot = low;
+    unsigned long i = low;
+    unsigned long j = high;
+
+    while(i < j) {
+        while(i <= high && arr[i] <= arr[pivot]) {
+            i++;
+        }
+
+        while(j>= low && arr[j] > arr[pivot]){
+            j--;
+        }
+    }
+
+    if(i < j) {
+        uint32_t temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+
+     // Put pivot in its final position
+    uint32_t temp = arr[low];
+    arr[low] = arr[j];
+    arr[j] = temp;
+
+    return j;
+
+}
+
+void quick_sort(uint32_t *arr, size_t low, size_t high) {
+
+    if (low < high) {
+        unsigned long pivot_location = partition(arr, low, high);
+        quick_sort(arr, low, pivot_location);
+        quick_sort(arr, pivot_location + 1, high);
+    }
+
+}
+
 // Avoid making changes to this function skeleton, apart from data type changes if required
 // In this starter code we have used uint32_t, feel free to change it to any other data type if required
 void sort_array(uint32_t *arr, size_t size) {
-    // Enter your logic here
-    merge_sort(arr, 0, size - 1);
-}
-
-/* Fill in the array with random numbers */
-void populate_array(uint32_t *arr, size_t size) {
-    
-    for (int i = 0; i < size; i++) {
-        arr[i] = size - i;
-    }
-}
-
-/* Print out array */
-void print_array(uint32_t *arr, size_t size, char message[]) {
-    
-    printf(message);
-    printf("[");
-    for (int i = 0; i < size; i++) {
-        printf("%d,", arr[i]);
-    }
-    printf("]\n");
+    //merge_sort(arr, 0, size - 1);
+    quick_sort(arr, 0, size - 1);
 }
 
 
 int main() {
     //Initialise the array
-    size_t size = 10;
+    size_t size = 1000;
     uint32_t *sorted_arr = malloc(size * sizeof(uint32_t)); // Allocate memory for the sorted array
     
     // Populate the array
