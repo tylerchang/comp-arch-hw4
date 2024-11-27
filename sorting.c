@@ -1,6 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h> 
+#include <stdint.h>
+#include <pthread.h>
+
+// Structure to pass arguments to the thread function
+typedef struct {
+    uint32_t* arr;
+    size_t low;
+    size_t high;
+} sort_args;
 
 /* Fill in the array with random numbers */
 void populate_array(uint32_t *arr, size_t size) {
@@ -88,7 +96,7 @@ void merge_sort(uint32_t *arr, size_t left, size_t right) {
     }
 }
 
-
+/* Partition helper functoin for quick sort*/
 int partition (uint32_t *arr, size_t low, size_t high) {
     
     size_t pivot = low;
@@ -105,6 +113,7 @@ int partition (uint32_t *arr, size_t low, size_t high) {
         }
     }
 
+    // Swap
     if(i < j) {
         uint32_t temp = arr[i];
         arr[i] = arr[j];
@@ -120,6 +129,7 @@ int partition (uint32_t *arr, size_t low, size_t high) {
 
 }
 
+/* Serial quick sort function */
 void quick_sort(uint32_t *arr, size_t low, size_t high) {
 
     if (low < high) {
@@ -130,32 +140,91 @@ void quick_sort(uint32_t *arr, size_t low, size_t high) {
 
 }
 
+/* Parallel quick sort function */
+void* parallel_quicksort(void* arg) {
+    sort_args* args = (sort_args*)arg;
+    uint32_t* arr = args->arr;
+    size_t low = args->low;
+    size_t high = args->high;
+    
+    if (low < high) {
+        unsigned long pivot_location = partition(arr, low, high);
+        
+        pthread_t thread;
+        sort_args left_args = {arr, low, pivot_location};
+        
+        // Create new thread for left partition
+        pthread_create(&thread, NULL, parallel_quicksort, &left_args);
+        
+        // Current thread handles right partition
+        sort_args right_args = {arr, pivot_location + 1, high};
+        parallel_quicksort(&right_args);
+        
+        // Wait for left partition to complete
+        pthread_join(thread, NULL);
+    }
+    
+    return NULL;
+}
+
+// Starter function to initiate parallel quicksort
+void start_parallel_quicksort(uint32_t *arr, size_t low, size_t high) {
+    sort_args args = {arr, low, high};
+    parallel_quicksort(&args);
+}
+
+// from homework one starter code
+static inline uint64_t rdtsc(){
+        unsigned long a, d;
+        asm volatile ("rdtsc" : "=a"(a), "=d"(d));
+        return a | ((uint64_t)d << 32);
+}
+
+/* THIS IS STARTER CODE FROM TA, NOT REALLY NEEDED RN, JUST KEEPING IT THO*/
 // Avoid making changes to this function skeleton, apart from data type changes if required
 // In this starter code we have used uint32_t, feel free to change it to any other data type if required
 void sort_array(uint32_t *arr, size_t size) {
     //merge_sort(arr, 0, size - 1);
-    quick_sort(arr, 0, size - 1);
+    //quick_sort(arr, 0, size - 1);
 }
 
 
 int main() {
+
+    // QUICK SORT EXPERIMENTS BEGIN
+
     //Initialise the array
-    size_t size = 1000;
-    uint32_t *sorted_arr = malloc(size * sizeof(uint32_t)); // Allocate memory for the sorted array
+    size_t size = 50000;
+    uint32_t *sorted_arr1 = malloc(size * sizeof(uint32_t)); // Allocate memory for the sorted array
+    uint32_t *sorted_arr2 = malloc(size * sizeof(uint32_t)); // Allocate memory for the sorted array
     
     // Populate the array
-    populate_array(sorted_arr, size);
-
-    // Print array before sorting
-    print_array(sorted_arr, size, "Array Before Sorting\n");
+    populate_array(sorted_arr1, size);
+    populate_array(sorted_arr2, size);
 
     // Sort the copied array
-    sort_array(sorted_arr, size);
+    uint64_t start = rdtsc();
+    quick_sort(sorted_arr1, 0, size - 1);
+    uint64_t end = rdtsc();
+    uint64_t serial_quick_sort_time = end - start;
+    printf("Serial: %ld Ticks\n", serial_quick_sort_time);
 
-    // Print the sorted array
-    print_array(sorted_arr, size, "Array After Sorting\n");
+    start = rdtsc();
+    start_parallel_quicksort(sorted_arr2, 0, size - 1);
+    end = rdtsc();
+    uint64_t parallel_quick_sort_time = end - start;
+    printf("Parallel: %ld Ticks\n", parallel_quick_sort_time);
 
-    free(sorted_arr);
+    free(sorted_arr1);
+    free(sorted_arr2);
+
+    // QUICK SORT EXPERIMENTS END
+
+
+    // MERGE SORT EXPERIMENTS BEGIN
+
+
+    // MERGE SORT EXPERIMENTS END
     
     return 0;
 }
