@@ -178,7 +178,7 @@ void* parallel_quicksort(void* arg) {
         unsigned long pivot_location = partition(arr, low, high);
         
         pthread_t thread;
-        sort_args left_args = {arr, low, pivot_location};
+        sort_args left_args = {arr, low, pivot_location-1};
         
         // Create new thread for left partition
         pthread_create(&thread, NULL, parallel_quicksort, &left_args);
@@ -244,6 +244,8 @@ int main() {
 
     free(sorted_arr1);
     free(sorted_arr2);
+
+    // print_array(sorted_arr2, size, "Parallel Sort Result: ");
 
     // QUICK SORT EXPERIMENTS END
 
