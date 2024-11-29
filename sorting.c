@@ -11,10 +11,10 @@ typedef struct {
 } sort_args;
 
 // Populate memory array from a provided file of unsigned ints
-int populate_from_file(const char *filename, unsigned int **array, size_t size) {
+int populate_from_file(const char *filename, uint32_t **array, size_t size) {
     FILE *file = NULL;
 
-    *array = (unsigned int *)malloc(size * sizeof(unsigned int));
+    *array = (uint32_t *)malloc(size * sizeof(uint32_t));
     if (*array == NULL) {
         perror("Memory allocation failed.");
         return -1;
@@ -43,7 +43,6 @@ int populate_from_file(const char *filename, unsigned int **array, size_t size) 
 
 /* Fill in the array with random numbers */
 void populate_array(uint32_t *arr, size_t size) {
-    
     for (int i = 0; i < size; i++) {
         arr[i] = size - i;
     }
@@ -127,31 +126,30 @@ void merge_sort(uint32_t *arr, size_t left, size_t right) {
     }
 }
 
-/* Partition helper functoin for quick sort*/
+/* Partition helper function for quick sort*/
 int partition (uint32_t *arr, size_t low, size_t high) {
-    
     size_t pivot = low;
     unsigned long i = low;
     unsigned long j = high;
 
-    while(i < j) {
-        while(i <= high && arr[i] <= arr[pivot]) {
+    while (i <= j) {
+        while (i <= high && arr[i] <= arr[pivot]) {
             i++;
         }
 
-        while(j>= low && arr[j] > arr[pivot]){
+        while (j >= low && arr[j] > arr[pivot]) {
             j--;
+        }
+
+        if (i < j) {
+            // Swap arr[i] and arr[j]
+            uint32_t temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
         }
     }
 
-    // Swap
-    if(i < j) {
-        uint32_t temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-    }
-
-     // Put pivot in its final position
+    // Put pivot in its final position
     uint32_t temp = arr[low];
     arr[low] = arr[j];
     arr[j] = temp;
@@ -162,13 +160,11 @@ int partition (uint32_t *arr, size_t low, size_t high) {
 
 /* Serial quick sort function */
 void quick_sort(uint32_t *arr, size_t low, size_t high) {
-
     if (low < high) {
         unsigned long pivot_location = partition(arr, low, high);
-        quick_sort(arr, low, pivot_location);
+        quick_sort(arr, low, pivot_location - 1);
         quick_sort(arr, pivot_location + 1, high);
     }
-
 }
 
 /* Parallel quick sort function */
@@ -225,15 +221,13 @@ int main() {
     // QUICK SORT EXPERIMENTS BEGIN
 
     //Initialise the array
-    size_t size = 50;
+    size_t size = 10000;
     uint32_t *sorted_arr1 = malloc(size * sizeof(uint32_t)); // Allocate memory for the sorted array
     uint32_t *sorted_arr2 = malloc(size * sizeof(uint32_t)); // Allocate memory for the sorted array
     
     // Populate the array
-    // populate_array(sorted_arr1, size);
-    // populate_array(sorted_arr2, size);
     populate_from_file("uniform10.txt", &sorted_arr1, size);
-    // populate_from_file("uniform10.txt", &sorted_arr2, size);
+    populate_from_file("uniform10.txt", &sorted_arr2, size);
 
     // Sort the copied array
     uint64_t start = rdtsc();
@@ -242,11 +236,11 @@ int main() {
     uint64_t serial_quick_sort_time = end - start;
     printf("Serial: %ld Ticks\n", serial_quick_sort_time);
 
-    // start = rdtsc();
-    // start_parallel_quicksort(sorted_arr2, 0, size - 1);
-    // end = rdtsc();
-    // uint64_t parallel_quick_sort_time = end - start;
-    // printf("Parallel: %ld Ticks\n", parallel_quick_sort_time);
+    start = rdtsc();
+    start_parallel_quicksort(sorted_arr2, 0, size - 1);
+    end = rdtsc();
+    uint64_t parallel_quick_sort_time = end - start;
+    printf("Parallel: %ld Ticks\n", parallel_quick_sort_time);
 
     free(sorted_arr1);
     free(sorted_arr2);

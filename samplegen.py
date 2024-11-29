@@ -18,4 +18,4 @@ class Uniform:
 
 if __name__ == '__main__':
     dist = Uniform(0, 10)
-    dist.write_samples(50, 'uniform10.txt')
+    dist.write_samples(10000, 'uniform10.txt')
