@@ -10,6 +10,37 @@ typedef struct {
     size_t high;
 } sort_args;
 
+// Populate memory array from a provided file of unsigned ints
+int populate_from_file(const char *filename, unsigned int **array, size_t size) {
+    FILE *file = NULL;
+
+    *array = (unsigned int *)malloc(size * sizeof(unsigned int));
+    if (*array == NULL) {
+        perror("Memory allocation failed.");
+        return -1;
+    }
+
+    file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("Error opening file.");
+        free(*array);
+        return -1;
+    }
+
+    for (size_t i = 0; i < size; ++i) {
+        if (fscanf(file, "%u", &(*array)[i]) != 1) {
+            fprintf(stderr, "Error reading integer at position %zu\n", i);
+            free(*array);
+            fclose(file);
+            return -1;
+        }
+    }
+
+    fclose(file);
+
+    return 0;
+}
+
 /* Fill in the array with random numbers */
 void populate_array(uint32_t *arr, size_t size) {
     
@@ -194,13 +225,15 @@ int main() {
     // QUICK SORT EXPERIMENTS BEGIN
 
     //Initialise the array
-    size_t size = 50000;
+    size_t size = 50;
     uint32_t *sorted_arr1 = malloc(size * sizeof(uint32_t)); // Allocate memory for the sorted array
     uint32_t *sorted_arr2 = malloc(size * sizeof(uint32_t)); // Allocate memory for the sorted array
     
     // Populate the array
-    populate_array(sorted_arr1, size);
-    populate_array(sorted_arr2, size);
+    // populate_array(sorted_arr1, size);
+    // populate_array(sorted_arr2, size);
+    populate_from_file("uniform10.txt", &sorted_arr1, size);
+    // populate_from_file("uniform10.txt", &sorted_arr2, size);
 
     // Sort the copied array
     uint64_t start = rdtsc();
@@ -209,11 +242,11 @@ int main() {
     uint64_t serial_quick_sort_time = end - start;
     printf("Serial: %ld Ticks\n", serial_quick_sort_time);
 
-    start = rdtsc();
-    start_parallel_quicksort(sorted_arr2, 0, size - 1);
-    end = rdtsc();
-    uint64_t parallel_quick_sort_time = end - start;
-    printf("Parallel: %ld Ticks\n", parallel_quick_sort_time);
+    // start = rdtsc();
+    // start_parallel_quicksort(sorted_arr2, 0, size - 1);
+    // end = rdtsc();
+    // uint64_t parallel_quick_sort_time = end - start;
+    // printf("Parallel: %ld Ticks\n", parallel_quick_sort_time);
 
     free(sorted_arr1);
     free(sorted_arr2);
