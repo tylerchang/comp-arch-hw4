@@ -2,19 +2,21 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <pthread.h>
+#include <time.h>
 
 // Structure to pass arguments to the thread function
 typedef struct {
-    uint32_t* arr;
-    size_t low;
-    size_t high;
-} sort_args;
+    uint32_t* a;
+    size_t lo;
+    size_t hi;
+} SortParams;
 
 /* Fill in the array with random numbers */
-void populate_array(uint32_t *arr, size_t size) {
-    
+void populate_array(uint32_t *arr, uint32_t *arr2, uint32_t *arr3, size_t size) {
     for (int i = 0; i < size; i++) {
         arr[i] = size - i;
+        arr2[i] = size - i;
+        arr3[i] = size - i;
     }
 }
 
@@ -96,82 +98,136 @@ void merge_sort(uint32_t *arr, size_t left, size_t right) {
     }
 }
 
-/* Partition helper functoin for quick sort*/
-int partition (uint32_t *arr, size_t low, size_t high) {
-    
-    size_t pivot = low;
-    unsigned long i = low;
-    unsigned long j = high;
 
-    while(i < j) {
-        while(i <= high && arr[i] <= arr[pivot]) {
-            i++;
-        }
-
-        while(j>= low && arr[j] > arr[pivot]){
-            j--;
-        }
+int partition(uint32_t *a, size_t i, size_t j) {
+    uint32_t v0 = a[i], v1 = a[(i+j+1)/2], v2 = a[j];
+    /* pivot: median of v0,v1,v2 */
+    uint32_t v = v0 < v1 ? v1 < v2 ? v1 : v0 < v2 ? v2 : v0 : v0 < v2 ? v0 : v1 < v2 ? v2 : v1;
+    while (i < j) {
+        while (a[i] < v && ++i < j);
+        while (v < a[j] && i < --j);
+        uint32_t t = a[j]; 
+        a[j] = a[i]; 
+        a[i]= t; //swap
     }
-
-    // Swap
-    if(i < j) {
-        uint32_t temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-    }
-
-     // Put pivot in its final position
-    uint32_t temp = arr[low];
-    arr[low] = arr[j];
-    arr[j] = temp;
-
+    /* i == j; that's where the pivot belongs */
+    a[i] = v;
     return j;
-
 }
 
-/* Serial quick sort function */
-void quick_sort(uint32_t *arr, size_t low, size_t high) {
-
-    if (low < high) {
-        unsigned long pivot_location = partition(arr, low, high);
-        quick_sort(arr, low, pivot_location);
-        quick_sort(arr, pivot_location + 1, high);
+void quick_sort(uint32_t a[], size_t lo, size_t hi) {
+    while (lo < hi) {
+        size_t j = partition(a, lo, hi);
+        if (j - lo < hi -j) {
+            quick_sort(a, lo, j-1);
+            lo = j+1;
+        } else {
+            quick_sort(a, j+1, hi);
+            hi = j-1;
+        }
     }
-
 }
 
-/* Parallel quick sort function */
-void* parallel_quicksort(void* arg) {
-    sort_args* args = (sort_args*)arg;
-    uint32_t* arr = args->arr;
-    size_t low = args->low;
-    size_t high = args->high;
-    
-    if (low < high) {
-        unsigned long pivot_location = partition(arr, low, high);
-        
-        pthread_t thread;
-        sort_args left_args = {arr, low, pivot_location};
-        
-        // Create new thread for left partition
-        pthread_create(&thread, NULL, parallel_quicksort, &left_args);
-        
-        // Current thread handles right partition
-        sort_args right_args = {arr, pivot_location + 1, high};
-        parallel_quicksort(&right_args);
-        
-        // Wait for left partition to complete
-        pthread_join(thread, NULL);
-    }
-    
+/* Thread function for parallel quicksort */ 
+void* parallel_quick_sort_thread(void* arg) {
+    SortParams* params = (SortParams*)arg;
+    quick_sort(params->a, params->lo, params->hi);
+    free(params);
     return NULL;
 }
 
-// Starter function to initiate parallel quicksort
-void start_parallel_quicksort(uint32_t *arr, size_t low, size_t high) {
-    sort_args args = {arr, low, high};
-    parallel_quicksort(&args);
+/* Parallel quick sort function */
+void parallel_quick_sort(uint32_t a[], size_t lo, size_t hi) {
+    while (lo < hi) {
+        size_t j = partition(a, lo, hi);
+        pthread_t thread;
+        SortParams* params;
+        
+        if (j - lo < hi - j) {
+            // Create a new thread for the smaller partition
+            params = malloc(sizeof(SortParams));
+            params->a = a;
+            params->lo = lo;
+            params->hi = j - 1;
+            pthread_create(&thread, NULL, parallel_quick_sort_thread, params);
+            
+            // Continue with the larger partition in this thread
+            lo = j + 1;
+        } else {
+            // Create a new thread for the smaller partition
+            params = malloc(sizeof(SortParams));
+            params->a = a;
+            params->lo = j + 1;
+            params->hi = hi;
+            pthread_create(&thread, NULL, parallel_quick_sort_thread, params);
+            
+            // Continue with the larger partition in this thread
+            hi = j - 1;
+        }
+        
+        // Wait for the child thread to complete
+        pthread_join(thread, NULL);
+        return;
+        
+    }
 }
+
+/* Even more optimized parallel quick sort */
+void optimized_parallel_quick_sort(uint32_t a[], size_t lo, size_t hi) {
+    while (lo < hi) {
+        size_t j = partition(a, lo, hi);
+        
+        /* Only thread if partition is size 1000 and above */
+        if (hi - lo > 1000) {
+            pthread_t thread;
+            SortParams* params;
+            
+            if (j - lo < hi - j) {
+                // Create a new thread for the smaller partition
+                params = malloc(sizeof(SortParams));
+                params->a = a;
+                params->lo = lo;
+                params->hi = j - 1;
+                pthread_create(&thread, NULL, parallel_quick_sort_thread, params);
+                
+                // Continue with the larger partition in this thread
+                lo = j + 1;
+            } else {
+                // Create a new thread for the smaller partition
+                params = malloc(sizeof(SortParams));
+                params->a = a;
+                params->lo = j + 1;
+                params->hi = hi;
+                pthread_create(&thread, NULL, parallel_quick_sort_thread, params);
+                
+                // Continue with the larger partition in this thread
+                hi = j - 1;
+            }
+            
+            // Wait for the child thread to complete
+            pthread_join(thread, NULL);
+            return;
+        } else {
+            // For smaller subarrays, continue with sequential algorithm
+            if (j - lo < hi - j) {
+                quick_sort(a, lo, j - 1);
+                lo = j + 1;
+            } else {
+                quick_sort(a, j + 1, hi);
+                hi = j - 1;
+            }
+        }
+    }
+}
+
+int is_sorted(uint32_t *arr, size_t size) {
+    for (int i = 0;  i+1 < size;  ++i){
+        if (arr[i] >= arr[i+1])
+            return 0;
+    }
+    return 1;
+}
+
 
 // from homework one starter code
 static inline uint64_t rdtsc(){
@@ -189,42 +245,72 @@ void sort_array(uint32_t *arr, size_t size) {
 }
 
 
+void perform_quick_sort_experiments() {
+    size_t size = 10;
+
+    while (size <= 100000000) {
+
+        printf("Array Length: %ld\n", size);
+
+        for (int i = 0; i < 3; i++) {
+            printf("Trial %d\n", i+1);
+
+            // Initialize the array
+            uint32_t *sorted_arr1 = malloc(size * sizeof(uint32_t)); 
+            uint32_t *sorted_arr2 = malloc(size * sizeof(uint32_t));
+            uint32_t *sorted_arr3 = malloc(size * sizeof(uint32_t));
+            
+            // Populate the array
+            populate_array(sorted_arr1, sorted_arr2, sorted_arr3, size);
+
+            // Sort the copied array
+            uint64_t start = rdtsc();
+            quick_sort(sorted_arr1, 0, size - 1);
+            uint64_t end = rdtsc();
+            uint64_t serial_quick_sort_time = end - start;
+            if(is_sorted(sorted_arr1, size))
+                printf("Serial: %ld Ticks\n", serial_quick_sort_time);
+            else
+                printf("Serial Quicksort did not sort correctly\n");
+
+
+            start = rdtsc();
+            parallel_quick_sort(sorted_arr2, 0, size - 1);
+            end = rdtsc();
+            uint64_t parallel_quick_sort_time = end - start;
+            if(is_sorted(sorted_arr2, size))
+                printf("Parallel: %ld Ticks\n", parallel_quick_sort_time);
+            else
+                printf("Parallel Quicksort did not sort correctly\n");
+
+            
+            start = rdtsc();
+            optimized_parallel_quick_sort(sorted_arr3, 0, size - 1);
+            end = rdtsc();
+            uint64_t optimized_parallel_quick_sort_time = end - start;
+            if(is_sorted(sorted_arr3, size))
+                printf("Optimized Parallel: %ld Ticks\n", optimized_parallel_quick_sort_time);
+            else
+                printf("Optimized Parallel Quicksort did not sort correctly\n");
+            
+
+            free(sorted_arr1);
+            free(sorted_arr2);
+            free(sorted_arr3);
+            printf("---------------------------------------\n");
+        }
+
+        size *= 10;
+        printf("----------------------------------------------------------\n");
+        printf("----------------------------------------------------------\n");
+    }
+}
+
+
+
 int main() {
 
-    // QUICK SORT EXPERIMENTS BEGIN
-
-    //Initialise the array
-    size_t size = 50000;
-    uint32_t *sorted_arr1 = malloc(size * sizeof(uint32_t)); // Allocate memory for the sorted array
-    uint32_t *sorted_arr2 = malloc(size * sizeof(uint32_t)); // Allocate memory for the sorted array
-    
-    // Populate the array
-    populate_array(sorted_arr1, size);
-    populate_array(sorted_arr2, size);
-
-    // Sort the copied array
-    uint64_t start = rdtsc();
-    quick_sort(sorted_arr1, 0, size - 1);
-    uint64_t end = rdtsc();
-    uint64_t serial_quick_sort_time = end - start;
-    printf("Serial: %ld Ticks\n", serial_quick_sort_time);
-
-    start = rdtsc();
-    start_parallel_quicksort(sorted_arr2, 0, size - 1);
-    end = rdtsc();
-    uint64_t parallel_quick_sort_time = end - start;
-    printf("Parallel: %ld Ticks\n", parallel_quick_sort_time);
-
-    free(sorted_arr1);
-    free(sorted_arr2);
-
-    // QUICK SORT EXPERIMENTS END
-
-
-    // MERGE SORT EXPERIMENTS BEGIN
-
-
-    // MERGE SORT EXPERIMENTS END
+    perform_quick_sort_experiments();
     
     return 0;
 }
