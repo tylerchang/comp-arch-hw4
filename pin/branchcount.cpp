@@ -16,27 +16,39 @@ ofstream OutFile;
 
 // The running count of instructions is kept here
 // make it static to help the compiler optimize docount
-static UINT64 icount = 0;
+static UINT64 bcount = 0;
+static UINT64 ubcount = 0;
 
 // This function is called before every instruction is executed
-VOID docount() { icount++; }
-
-// Pin calls this function every time a new instruction is encountered
-VOID Instruction(INS ins, VOID* v){
-    // Insert a call to docount if input instruction is a branch
-    if (INS_IsBranch(ins)){
-        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)docount, IARG_END);
+VOID docount(BOOL isConditional) { 
+    if (isConditional){
+        bcount++;
+    } else {
+        ubcount++;
     }
 }
 
-KNOB< string > KnobOutputFile(KNOB_MODE_WRITEONCE, "pintool", "o", "inscount.out", "specify output file name");
+// Pin calls this function every time a new instruction is encountered
+VOID Instruction(INS ins, VOID* v) {
+    // Check if the instruction is a branch
+    if (INS_IsBranch(ins)) {
+        BOOL isConditional = INS_HasFallThrough(ins);  // A branch with fall through must be conditional
+        UINT32 size = INS_Size(ins);
+
+        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)docount, IARG_BOOL, isConditional, IARG_END);
+    }
+}
+
+
+KNOB< string > KnobOutputFile(KNOB_MODE_WRITEONCE, "pintool", "o", "branchcount.out", "specify output file name");
 
 // This function is called when the application exits
 VOID Fini(INT32 code, VOID* v)
 {
     // Write to a file since cout and cerr maybe closed by the application
     OutFile.setf(ios::showbase);
-    OutFile << "Count " << icount << endl;
+    OutFile << "Conditional Branch Count: " << bcount << endl;
+    OutFile << "Unconditional Branch Count: " << ubcount << endl;
     OutFile.close();
 }
 
@@ -46,7 +58,7 @@ VOID Fini(INT32 code, VOID* v)
 
 INT32 Usage()
 {
-    cerr << "This tool counts the number of dynamic instructions executed" << endl;
+    cerr << "This tool counts the number of branch instructions executed" << endl;
     cerr << endl << KNOB_BASE::StringKnobSummary() << endl;
     return -1;
 }
