@@ -1,8 +1,3 @@
-/*
- * Copyright (C) 2004-2021 Intel Corporation.
- * SPDX-License-Identifier: MIT
- */
-
 #include <iostream>
 #include <fstream>
 #include "pin.H"
@@ -16,8 +11,8 @@ ofstream OutFile;
 
 // The running count of instructions is kept here
 // make it static to help the compiler optimize docount
-static UINT64 bcount = 0;
-static UINT64 ubcount = 0;
+static UINT64 bcount = 0;  // Conditional branches
+static UINT64 ubcount = 0; // Unconditional branches
 
 // This function is called before every instruction is executed
 VOID docount(BOOL isConditional) { 
@@ -30,12 +25,9 @@ VOID docount(BOOL isConditional) {
 
 // Pin calls this function every time a new instruction is encountered
 VOID Instruction(INS ins, VOID* v) {
-    // Check if the instruction is a branch
     if (INS_IsBranch(ins)) {
         BOOL isConditional = INS_HasFallThrough(ins);  // A branch with fall through must be conditional
-        UINT32 size = INS_Size(ins);
-
-        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)docount, IARG_BOOL, isConditional, IARG_END);
+        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR) docount, IARG_BOOL, isConditional, IARG_END);
     }
 }
 
