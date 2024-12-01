@@ -61,9 +61,9 @@ VOID Instruction(INS ins, VOID* v) {
     // from the PIN library
     // TRUE for the image Pin was applied on in the command line (i.e. first param after –)
     // skips non main ones
-    if (!IMG_IsMainExecutable(IMG_FindByAddress(INS_Address(ins)))) {
-        return;
-    }
+    // if (!IMG_IsMainExecutable(IMG_FindByAddress(INS_Address(ins)))) {
+    //     return;
+    // }
 
     if (INS_IsBranch(ins)) {
         BOOL isConditional = INS_HasFallThrough(ins);  // A branch with fall through must be conditional
