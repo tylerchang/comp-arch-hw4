@@ -101,11 +101,12 @@ VOID Fini(INT32 code, VOID* v)
 {
     // Write to a file since cout and cerr maybe closed by the application
     OutFile.setf(ios::showbase);
-    OutFile << "Conditional Branch Count: " << bcount << endl;
+    OutFile << "Conditional Branches Taken: " << bcountTaken << endl;
+    OutFile << "Conditional Branches Not Taken: " << bcountNotTaken << endl;
     OutFile << "Unconditional Branch Count: " << ubcount << endl;
     OutFile.close();
 
-    SaveBranchListToFile("branches_taken.txt")
+    SaveBranchListToFile("branches_taken.txt");
 }
 
 /* ===================================================================== */
