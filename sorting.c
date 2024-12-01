@@ -11,6 +11,37 @@ typedef struct {
     size_t hi;
 } SortParams;
 
+// Populate memory array from a provided file of unsigned ints
+int populate_from_file(const char *filename, uint32_t **array, size_t size) {
+    FILE *file = NULL;
+
+    *array = (uint32_t *)malloc(size * sizeof(uint32_t));
+    if (*array == NULL) {
+        perror("Memory allocation failed.");
+        return -1;
+    }
+
+    file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("Error opening file.");
+        free(*array);
+        return -1;
+    }
+
+    for (size_t i = 0; i < size; ++i) {
+        if (fscanf(file, "%u", &(*array)[i]) != 1) {
+            fprintf(stderr, "Error reading integer at position %zu\n", i);
+            free(*array);
+            fclose(file);
+            return -1;
+        }
+    }
+
+    fclose(file);
+
+    return 0;
+}
+
 /* Fill in the array with random numbers */
 void populate_array(uint32_t *arr, uint32_t *arr2, uint32_t *arr3, size_t size) {
     for (int i = 0; i < size; i++) {
