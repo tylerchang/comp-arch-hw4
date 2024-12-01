@@ -44,10 +44,12 @@ int populate_from_file(const char *filename, uint32_t **array, size_t size) {
 
 /* Fill in the array with random numbers */
 void populate_array(uint32_t *arr, uint32_t *arr2, uint32_t *arr3, size_t size) {
+    srand(time(NULL));
     for (int i = 0; i < size; i++) {
-        arr[i] = size - i;
-        arr2[i] = size - i;
-        arr3[i] = size - i;
+        uint32_t x = ((uint32_t)rand() << 16) | (uint32_t)rand();
+        arr[i] = x;
+        arr2[i] = x;
+        arr3[i] = x;
     }
 }
 
@@ -129,38 +131,57 @@ void merge_sort(uint32_t *arr, size_t left, size_t right) {
     }
 }
 
-void swap(){
 
-}
+// int partition(uint32_t *a, size_t i, size_t j) {
+//     uint32_t v0 = a[i], v1 = a[(i+j+1)/2], v2 = a[j];
+//     /* pivot: median of v0,v1,v2 */
+//     uint32_t v = v0 < v1 ? v1 < v2 ? v1 : v0 < v2 ? v2 : v0 : v0 < v2 ? v0 : v1 < v2 ? v2 : v1;
+    
+//     //v = a[i];  // For some reason this fails with median of three partitioning
+//     i--;
+//     j++;
+//     while (1) {
+//         do {i++;} while (a[i] < v);
+//         do {j--;} while (a[j] > v);
+
+//         if (i >= j) return j;
+
+//         uint32_t temp = a[i];
+//         a[i] = a[j];
+//         a[j] = temp;
+//     }
+
+// }
+
 
 int partition(uint32_t *a, size_t i, size_t j) {
-    uint32_t v0 = a[i], v1 = a[(i+j+1)/2], v2 = a[j];
+
+    size_t v0 = a[i], v1 = a[(i+j+1)/2], v2 = a[j];
     /* pivot: median of v0,v1,v2 */
-    uint32_t v = v0 < v1 ? v1 < v2 ? v1 : v0 < v2 ? v2 : v0 : v0 < v2 ? v0 : v1 < v2 ? v2 : v1;
-    
-    v = a[i];  // For some reason this fails with median of three partitioning
-
-    i--;
-    j++;
-    while (1) {
-        do {i++;} while (a[i] < v);
-        do {j--;} while (a[j] > v);
-
-        if (i >= j) return j;
-
-        uint32_t temp = a[i];
-        a[i] = a[j];
-        a[j] = temp;
+    size_t v = v0 < v1 ? v1 < v2 ? v1 : v0 < v2 ? v2 : v0 : v0 < v2 ? v0 : v1 < v2 ? v2 : v1;
+    while (i < j) {
+        while (a[i] < v && ++i < j);
+        while (v < a[j] && i < --j);
+        uint32_t t = a[j]; 
+        a[j] = a[i]; 
+        a[i]= t; //swap
     }
-
+    /* i == j; that's where the pivot belongs */
+    a[i] = v;
+    return j;
 }
 
 void quick_sort(uint32_t a[], size_t lo, size_t hi) {
-    printf("lo: %ld | hi: %ld\n", lo, hi);
-    if (lo >= 0 && hi >= 0 && lo < hi){
-        size_t p = partition(a, lo, hi);
-        quick_sort(a, lo, p);
-        quick_sort(a, p+1, hi);
+
+    while (lo < hi) {
+        size_t j = partition(a, lo, hi);
+        if (j - lo < hi -j) {
+            quick_sort(a, lo, j-1);
+            lo = j+1;
+        } else {
+            quick_sort(a, j+1, hi);
+            hi = j-1;
+        }
     }
 }
 
@@ -309,12 +330,12 @@ void perform_quick_sort_experiments() {
             quick_sort(sorted_arr1, 0, size - 1);
             uint64_t end = rdtsc();
             uint64_t serial_quick_sort_time = end - start;
-            print_array(sorted_arr1, size, "Sorted: ");
-            exit(0);
+
             if(is_sorted(sorted_arr1, size))
-                printf("Serial: %ld Ticks\n", serial_quick_sort_time);
+                printf("Serial: %llu Ticks\n", serial_quick_sort_time);
             else
                 printf("Serial Quicksort did not sort correctly\n");
+        
 
 
             start = rdtsc();
@@ -322,7 +343,7 @@ void perform_quick_sort_experiments() {
             end = rdtsc();
             uint64_t parallel_quick_sort_time = end - start;
             if(is_sorted(sorted_arr2, size))
-                printf("Parallel: %ld Ticks\n", parallel_quick_sort_time);
+                printf("Parallel: %llu Ticks\n", parallel_quick_sort_time);
             else
                 printf("Parallel Quicksort did not sort correctly\n");
 
@@ -332,7 +353,7 @@ void perform_quick_sort_experiments() {
             end = rdtsc();
             uint64_t optimized_parallel_quick_sort_time = end - start;
             if(is_sorted(sorted_arr3, size))
-                printf("Optimized Parallel: %ld Ticks\n", optimized_parallel_quick_sort_time);
+                printf("Optimized Parallel: %llu Ticks\n", optimized_parallel_quick_sort_time);
             else
                 printf("Optimized Parallel Quicksort did not sort correctly\n");
             
@@ -353,7 +374,57 @@ void perform_quick_sort_experiments() {
 
 int main() {
 
-    perform_quick_sort_experiments();
+        size_t size = 10000;
+
+        // Initialize the array
+        uint32_t *sorted_arr1 = malloc(size * sizeof(uint32_t)); 
+        uint32_t *sorted_arr2 = malloc(size * sizeof(uint32_t));
+        uint32_t *sorted_arr3 = malloc(size * sizeof(uint32_t));
+
+        // Populate the array
+        populate_array(sorted_arr1, sorted_arr2, sorted_arr3, size);
+        // populate_from_file("uniform10.txt", &sorted_arr1, size);
+        // populate_from_file("uniform10.txt", &sorted_arr2, size);
+        // populate_from_file("uniform10.txt", &sorted_arr3, size);
+
+        //print_array(sorted_arr1, size, "Unsorted: ");
+
+        // Sort the copied array
+        uint64_t start = rdtsc();
+        quick_sort(sorted_arr1, 0, size - 1);
+        uint64_t end = rdtsc();
+        uint64_t serial_quick_sort_time = end - start;
+        if(is_sorted(sorted_arr1, size))
+        printf("Serial: %llu Ticks\n", serial_quick_sort_time);
+        else
+        printf("Serial Quicksort did not sort correctly\n");
+
+        //print_array(sorted_arr1, size, "Sorted: ");
+        exit(0);
+
+        start = rdtsc();
+        parallel_quick_sort(sorted_arr2, 0, size - 1);
+        end = rdtsc();
+        uint64_t parallel_quick_sort_time = end - start;
+        if(is_sorted(sorted_arr2, size))
+        printf("Parallel: %llu Ticks\n", parallel_quick_sort_time);
+        else
+        printf("Parallel Quicksort did not sort correctly\n");
+
+
+        start = rdtsc();
+        optimized_parallel_quick_sort(sorted_arr3, 0, size - 1);
+        end = rdtsc();
+        uint64_t optimized_parallel_quick_sort_time = end - start;
+        if(is_sorted(sorted_arr3, size))
+        printf("Optimized Parallel: %llu Ticks\n", optimized_parallel_quick_sort_time);
+        else
+        printf("Optimized Parallel Quicksort did not sort correctly\n");
+
+
+        free(sorted_arr1);
+        free(sorted_arr2);
+        free(sorted_arr3);
     
     return 0;
 }
