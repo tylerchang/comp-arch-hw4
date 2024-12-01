@@ -77,7 +77,7 @@ VOID Instruction(INS ins, VOID* v) {
 
 // not sure but internet suggests this might solve?
 VOID ImageLoad(IMG img, VOID* v) {
-    if (IMG_IsMainExecutable(img) && !mainExecutableImg.Valid()) {
+    if (IMG_IsMainExecutable(img) && !mainExecutableImg.is_valid()) {
         mainExecutableImg = img;
         cerr << "Main executable image loaded: " << IMG_Name(img) << endl;
     }
@@ -125,7 +125,7 @@ VOID Fini(INT32 code, VOID* v)
     OutFile << "Unconditional Branch Count: " << ubcount << endl;
     OutFile.close();
 
-    SaveBranchListToFile("branches_taken.txt")
+    SaveBranchListToFile("branches_taken.txt");
     FreeBranchList();
 }
 
