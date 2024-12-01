@@ -21,7 +21,7 @@ void print_array(uint32_t *arr, size_t size, char message[]) {
     printf("]\n");
 }
 
-// Helper function to merge two sorted subarrays
+/* Helper function to merge two sorted subarrays */ 
 void merge(uint32_t *arr, size_t left, size_t mid, size_t right) {
 
     size_t n1 = mid - left + 1;
@@ -73,8 +73,8 @@ void merge(uint32_t *arr, size_t left, size_t mid, size_t right) {
     free(L);
     free(R);
 }
-
-// Helper function to recursively divide and merge the array
+ 
+/* Main merge sort implementation */
 void merge_sort(uint32_t *arr, size_t left, size_t right) {
     if (left < right) {
         size_t mid = left + (right - left) / 2;
@@ -88,7 +88,7 @@ void merge_sort(uint32_t *arr, size_t left, size_t right) {
     }
 }
 
-
+/* Helper function for quick sort */
 int partition (uint32_t *arr, size_t low, size_t high) {
     
     size_t pivot = low;
@@ -120,6 +120,7 @@ int partition (uint32_t *arr, size_t low, size_t high) {
 
 }
 
+/* Main quick sort implementation */
 void quick_sort(uint32_t *arr, size_t low, size_t high) {
 
     if (low < high) {
@@ -136,7 +137,6 @@ void sort_array(uint32_t *arr, size_t size) {
     //merge_sort(arr, 0, size - 1);
     quick_sort(arr, 0, size - 1);
 }
-
 
 int main() {
     //Initialise the array
