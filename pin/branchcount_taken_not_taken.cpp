@@ -15,6 +15,10 @@ static UINT64 bcountTaken = 0;  // Conditional branches Taken
 static UINT64 bcountNotTaken = 0; // Conditional branchec Not Taken
 static UINT64 ubcount = 0; // Unconditional branches
 
+
+// the imag here so its intalized right away
+IMG mainExecutableImg;
+
 typedef struct BranchInfo {
     ADDRINT instPtr;        // Instruction pointer
     ADDRINT branchTarget;   // Branch target address
@@ -71,6 +75,13 @@ VOID Instruction(INS ins, VOID* v) {
     }
 }
 
+// not sure but internet suggests this might solve?
+VOID ImageLoad(IMG img, VOID* v) {
+    if (IMG_IsMainExecutable(img) && !mainExecutableImg.Valid()) {
+        mainExecutableImg = img;
+        cerr << "Main executable image loaded: " << IMG_Name(img) << endl;
+    }
+}
 
 KNOB< string > KnobOutputFile(KNOB_MODE_WRITEONCE, "pintool", "o", "branchcount.out", "specify output file name");
 
@@ -94,6 +105,13 @@ VOID SaveBranchListToFile(const char* filename) {
     fclose(file);
 }
 
+void FreeBranchList() {
+    while (branchListHead) {
+        BranchInfo* temp = branchListHead;
+        branchListHead = branchListHead->next;
+        free(temp);
+    }
+}
 
 
 // This function is called when the application exits
@@ -101,11 +119,14 @@ VOID Fini(INT32 code, VOID* v)
 {
     // Write to a file since cout and cerr maybe closed by the application
     OutFile.setf(ios::showbase);
-    OutFile << "Conditional Branch Count: " << bcount << endl;
+    OutFile << "Conditional Branch Count: " << (bcountTaken + bcountNotTaken) << endl;
+    OutFile << "Taken Braches: " << bcountTaken << endl;
+    OutFile << "Taken Braches: " << bcountNotTaken << endl;
     OutFile << "Unconditional Branch Count: " << ubcount << endl;
     OutFile.close();
 
     SaveBranchListToFile("branches_taken.txt")
+    FreeBranchList();
 }
 
 /* ===================================================================== */
@@ -131,6 +152,8 @@ int main(int argc, char* argv[])
     if (PIN_Init(argc, argv)) return Usage();
 
     OutFile.open(KnobOutputFile.Value().c_str());
+
+    IMG_AddInstrumentFunction(ImageLoad, 0);
 
     // Register Instruction to be called to instrument instructions
     INS_AddInstrumentFunction(Instruction, 0);
