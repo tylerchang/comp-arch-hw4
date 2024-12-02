@@ -1,8 +1,8 @@
 Run branchcount from ./pin on ./simplebranch and output in branchcountlog.o
 ./pin-external-3.31-98869-gfa6f126a8-gcc-linux/pin -t obj-intel64/branchcount.so -o branchcountlog.o -- ./simplebranch
 
-Run branchcount_taken_not_taken from ./pin on ./simplebranch
-./pin-external-3.31-98869-gfa6f126a8-gcc-linux/pin -t obj-intel64/branchcount_taken_not_taken.so -o fullbranchcounts.o -- ./simplebranch
+Run fullbranchcount from ./pin on ./simplebranch
+./pin-external-3.31-98869-gfa6f126a8-gcc-linux/pin -t obj-intel64/fullbranchcount.so -o fullbranchcounts.o -- ./simplebranch
 
 set PIN_ROOT
 export PIN_ROOT=~/pin/pin-external-3.31-98869-gfa6f126a8-gcc-linux
