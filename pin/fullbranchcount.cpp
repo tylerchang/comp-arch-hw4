@@ -74,7 +74,7 @@ VOID Instruction(INS ins, VOID* v) {
 }
 
 
-KNOB< string > KnobOutputFile(KNOB_MODE_WRITEONCE, "pintool", "o", "branchcount.out", "specify output file name");
+KNOB< string > KnobOutputFile(KNOB_MODE_WRITEONCE, "pintool", "o", "outputs/branchcount.out", "specify output file name");
 
 
 VOID SaveBranchListToFile(const char* filename) {
@@ -108,7 +108,7 @@ VOID Fini(INT32 code, VOID* v)
     OutFile << "Conditional Branches Not Taken: " << bcountNotTaken << endl;
     OutFile.close();
 
-    SaveBranchListToFile("branchlog.txt");
+    SaveBranchListToFile("outputs/branchlog.txt");
 }
 
 /* ===================================================================== */
