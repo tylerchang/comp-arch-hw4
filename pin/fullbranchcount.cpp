@@ -10,7 +10,7 @@ using std::string;
 ofstream OutFile;
 
 // The running count of instructions is kept here
-// make it static to help the compiler optimize docount
+// make it static to help the compiler optimize logbranch
 static UINT64 bcountTaken = 0;  // Conditional branches taken
 static UINT64 bcountNotTaken = 0; // Conditional branches not taken
 
@@ -41,7 +41,7 @@ void AddBranchInfo(ADDRINT instPtr, ADDRINT branchTarget, ADDRINT branchFallThro
 
 
 // This function is called before every instruction is executed
-VOID docount(ADDRINT instPtr, ADDRINT branchTarget, ADDRINT branchFallThrough, BOOL branchTaken) {
+VOID logbranch(ADDRINT instPtr, ADDRINT branchTarget, ADDRINT branchFallThrough, BOOL branchTaken) {
     if (branchTaken){
         bcountTaken++;
     }
@@ -68,7 +68,7 @@ VOID Instruction(INS ins, VOID* v) {
     // std::cout << "Current image: " << IMG_Name(img) << endl;
 
     if (INS_IsBranch(ins) && INS_HasFallThrough(ins)) {
-        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR) docount, 
+        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR) logbranch, 
                        IARG_INST_PTR, IARG_BRANCH_TARGET_ADDR, IARG_FALLTHROUGH_ADDR, IARG_BRANCH_TAKEN, IARG_END);
     }
 }
@@ -108,7 +108,7 @@ VOID Fini(INT32 code, VOID* v)
     OutFile << "Conditional Branches Not Taken: " << bcountNotTaken << endl;
     OutFile.close();
 
-    SaveBranchListToFile("branches_taken.txt");
+    SaveBranchListToFile("branchlog.txt");
 }
 
 /* ===================================================================== */
