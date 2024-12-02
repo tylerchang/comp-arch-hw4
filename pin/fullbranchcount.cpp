@@ -11,13 +11,13 @@ ofstream OutFile;
 
 // The running count of instructions is kept here
 // make it static to help the compiler optimize docount
-static UINT64 bcountTaken = 0;  // Conditional branches Taken
-static UINT64 bcountNotTaken = 0; // Conditional branchec Not Taken
-static UINT64 ubcount = 0; // Unconditional branches
+static UINT64 bcountTaken = 0;  // Conditional branches taken
+static UINT64 bcountNotTaken = 0; // Conditional branches not taken
 
 typedef struct BranchInfo {
     ADDRINT instPtr;        // Instruction pointer
     ADDRINT branchTarget;   // Branch target address
+    ADDRINT branchFallThrough;  // Fall through target
     BOOL branchTaken;       // Branch taken or not
     struct BranchInfo* next; // Pointer to the next node
 } BranchInfo;
@@ -25,7 +25,7 @@ typedef struct BranchInfo {
 BranchInfo* branchListHead = NULL;
 
 // basic linked list code copied from internet
-void AddBranchInfo(ADDRINT instPtr, ADDRINT branchTarget, BOOL branchTaken) {
+void AddBranchInfo(ADDRINT instPtr, ADDRINT branchTarget, ADDRINT branchFallThrough, BOOL branchTaken) {
     BranchInfo* newNode = (BranchInfo*)malloc(sizeof(BranchInfo));
     if (!newNode) {
         fprintf(stderr, "Memory allocation failed\n");
@@ -33,6 +33,7 @@ void AddBranchInfo(ADDRINT instPtr, ADDRINT branchTarget, BOOL branchTaken) {
     }
     newNode->instPtr = instPtr;
     newNode->branchTarget = branchTarget;
+    newNode->branchFallThrough = branchFallThrough;
     newNode->branchTaken = branchTaken;
     newNode->next = branchListHead;
     branchListHead = newNode;
@@ -40,18 +41,14 @@ void AddBranchInfo(ADDRINT instPtr, ADDRINT branchTarget, BOOL branchTaken) {
 
 
 // This function is called before every instruction is executed
-VOID docount(BOOL isConditional, ADDRINT instPtr, ADDRINT branchTarget, BOOL branchTaken) {
-    if (isConditional){
-        if (branchTaken){
-            bcountTaken++;
-            AddBranchInfo(instPtr, branchTarget, branchTaken);
-        }
-        else{
-            bcountNotTaken ++;
-        }
-    } else {
-        ubcount++;
+VOID docount(ADDRINT instPtr, ADDRINT branchTarget, ADDRINT branchFallThrough, BOOL branchTaken) {
+    if (branchTaken){
+        bcountTaken++;
     }
+    else{
+        bcountNotTaken++;
+    }
+    AddBranchInfo(instPtr, branchTarget, branchFallThrough, branchTaken);
 }
 
 // Pin calls this function every time a new instruction is encountered
@@ -68,11 +65,11 @@ VOID Instruction(INS ins, VOID* v) {
         return;
     }
 
-    std::cout << "Current image: " << IMG_Name(img) << endl;
+    // std::cout << "Current image: " << IMG_Name(img) << endl;
 
-    if (INS_IsBranch(ins)) {
-        BOOL isConditional = INS_HasFallThrough(ins);  // A branch with fall through must be conditional
-        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR) docount, IARG_BOOL, isConditional, IARG_INST_PTR, IARG_BRANCH_TARGET_ADDR, IARG_BRANCH_TAKEN, IARG_END);
+    if (INS_IsBranch(ins) && INS_HasFallThrough(ins)) {
+        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR) docount, 
+                       IARG_INST_PTR, IARG_BRANCH_TARGET_ADDR, IARG_FALLTHROUGH_ADDR, IARG_BRANCH_TAKEN, IARG_END);
     }
 }
 
@@ -89,9 +86,10 @@ VOID SaveBranchListToFile(const char* filename) {
 
     BranchInfo* current = branchListHead;
     while (current) {
-        fprintf(file, "InstPtr: 0x%lx, Target: 0x%lx, Taken: %d\n",
+        fprintf(file, "InstPtr: 0x%lx | Target: 0x%lx | Fall Through: 0x%lx | Taken: %d\n",
                 (unsigned long)current->instPtr,
                 (unsigned long)current->branchTarget,
+                (unsigned long)current->branchFallThrough,
                 current->branchTaken);
         current = current->next;
     }
@@ -108,7 +106,6 @@ VOID Fini(INT32 code, VOID* v)
     OutFile.setf(ios::showbase);
     OutFile << "Conditional Branches Taken: " << bcountTaken << endl;
     OutFile << "Conditional Branches Not Taken: " << bcountNotTaken << endl;
-    OutFile << "Unconditional Branch Count: " << ubcount << endl;
     OutFile.close();
 
     SaveBranchListToFile("branches_taken.txt");
