@@ -40,8 +40,16 @@ void AddBranchInfo(ADDRINT instPtr, ADDRINT branchTarget, ADDRINT branchFallThro
     newNode->branchTarget = branchTarget;
     newNode->branchFallThrough = branchFallThrough;
     newNode->branchTaken = branchTaken;
-    newNode->next = branchListHead;
-    branchListHead = newNode;
+    newNode->next = NULL;
+     if (!branchListHead) {
+        branchListHead = newNode;
+    } else {
+        BranchInfo* current = branchListHead;
+        while (current->next) {
+            current = current->next;
+        }
+        current->next = newNode;
+    }
 }
 
 
@@ -96,6 +104,8 @@ VOID SaveBranchListToFile(const char* filename) {
         exit(1);
     }
 
+
+
     BranchInfo* current = branchListHead;
     while (current) {
         fprintf(file, "InstPtr: 0x%lx | Target: 0x%lx | Fall Through: 0x%lx | Taken: %d\n",
@@ -125,7 +135,7 @@ VOID Fini(INT32 code, VOID* v)
     OutFile.setf(ios::showbase);
     OutFile << "Conditional Branch Count: " << (bcountTaken + bcountNotTaken) << endl;
     OutFile << "Taken Braches: " << bcountTaken << endl;
-    OutFile << "Taken Braches: " << bcountNotTaken << endl;
+    OutFile << "Not Taken Braches: " << bcountNotTaken << endl;
     OutFile << "Unconditional Branch Count: " << ubcount << endl;
     OutFile.close();
 
