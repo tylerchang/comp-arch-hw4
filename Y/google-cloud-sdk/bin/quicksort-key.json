@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "comp-arch-columbia",
+  "private_key_id": "4e16dc74588b167b21504c877f08616f77094c53",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCLmYJ9+fKsn8ZZ\n8fFZqsaWMZOdsKQfaUIoqc+elCQXR2ItZT+tunRpgo7pH9bbKcpBrulZe28CLl3v\nYTMQ1JTgvBBvYHqJeTxvAqSMhOBgWkzDFmElArnKEgnV0Zo4eO04MdmMce5YFhqd\npey41+uvXvo5ifdCeqgMZ9hrJ1HXMXBOzZveY3SRSnfH+M96N0BWpXv69//tb9L7\nELlKbVI9RuNtzqRoHxjCtRCZ+gHzH9/w1eccwXKXvOhPv305E1ZW1NWZ3lr6ztcV\n7X7M1aJpyQyWlfsrikdSou10nAdTubv+y4/6cSRlBZ+p/SLJPWx3/fDFcmbQo7Fx\nOZy5dT/pAgMBAAECggEAPn1GkQ7IZyaUWyH2+Dz+bTAfFIkERr1O7LXq5uEIcNU2\n6Pw4L5PV1X8oasmiW3PPAm0CLtiWngLUcLnxanjGdf0pXDnzUEORXl3v+6jlaawy\nTWfgr3kTYpWFio2re9kB01RZPkmnuA2Y93XVS/73lQauewA7yyntvLPliD3PIETr\nVPrbxtleJOQ5MSyOEvs2n5PFYcnA8mW04mTdjhAHXZjuZb60yMENbP19RgzsHPK8\nznK0H/9+jEL3VM6XNZT0xYfB7oKubmciAkdMEbPCh5k2ooQJehBf5M14C1ZgpOyY\nQ9jAwkTGG9cnReYualMDFdwZL8RLi95NXBA12Wq8IwKBgQDEI3hWCHn+6n5ucUrO\nCwg+Po5yRVOud/QRn6L53d1l4NtNL/QsRglqciuyItAcJCRISGPEacV2ZE+mN/O1\ndjOeeQwGjJxDEJHBRC7UbRdmzdmUUlMEx3UALH59/VqHY3ljt7J62lg9zjyIehqH\nVUEKwrGOyNRQwhcGn6UuGZX3WwKBgQC2NJcO8Ngx0K4hb++YS3f2uJ26rLWTqyu7\nff7yE6Glp6JgDLA3U9AoG40SLxUcMk6jgJsOmcS/QQN48J6tmkBa2j3Dhr2lSz1t\nI9623IN/jba4bepLVicfpu5a9e2Oll0a7GRYoLJpOtsOngm9+XFQtvw9X03DDPDX\n8rRQhZwNCwKBgB/+9Ut7mIMoN7XGj4BrNk4JIG2tt4f3k34of4qpUcuj0cKWtwtd\n5X1S4KPvn+lnT+/mtze8VXUJyiCAciZBAQyyDG8pEvixxEU13TnUDgQ8Qmk6wMY/\nz2tW1s+wu8roRE4rEleONOToNuHAoYFAPBsIRbTYOCJwdxciheyuSdOPAoGAR3qO\nIDBfv/srtLZi+g3xO/rk9cy3Vvz5pQ4iq/kDmycOTjvsDWh16qYUS6Po1izuKLpV\nGf887gKlSBatSVGQGZQwUrpTP7sql9xQjNApTircGbIVDgT4SDSGoWyFC0D1uZAv\nNY2lMB8EvNFG5R4sVAvVHIZ8zR4QhccS8dvYgk0CgYAxnk+7YVPX7lgBn0MCHrxq\nn1/9s6wDmwVYtj068sI3qTjFXkjZ/FF3S/jvzu/os+8rjvHq3KdZPkw3nnrTzl25\nJzj6/z1QMp9hnPUnK0fy5ANrWai8GNCFKhS1QVqIKm+WYCTnED1wXl5aWdGyYsX5\nnjvOnrg6Oeq4jIBpnkDZBw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "quicksort-service@comp-arch-columbia.iam.gserviceaccount.com",
+  "client_id": "114221156783247410890",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/quicksort-service%40comp-arch-columbia.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

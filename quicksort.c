@@ -156,13 +156,15 @@ static inline uint64_t rdtsc(){
 
 
 void perform_quick_sort_experiments() {
+    const uint64_t TRIALS = 30;
     size_t size = 10;
+    size_t max_size = 10000000;
 
     /* With Normal Distribution Data */
     printf("-----------------------------\n");
     printf("NORMAL DATA DISTRIBUTION\n");
     printf("-----------------------------\n");
-    while (size <= 10000000) {
+    while (size <= max_size) {
 
         uint64_t serial_quick_sort_time_sum = 0;
         uint64_t parallel_quick_sort_time_sum = 0;
@@ -170,7 +172,7 @@ void perform_quick_sort_experiments() {
         printf("Array Length: %ld\n", size);
 
         /* Run 3 Trials */
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < TRIALS; i++) {
             uint64_t start;
             uint64_t end;
             uint64_t serial_quick_sort_time; 
@@ -209,11 +211,14 @@ void perform_quick_sort_experiments() {
             free(sorted_arr2);
         }
 
-        printf("Serial Average: %lu Ticks\n", serial_quick_sort_time_sum / 3);
-        printf("Parallel Average: %lu Ticks\n", parallel_quick_sort_time_sum / 3);
+        uint64_t serial_quick_sort_time_avg = serial_quick_sort_time_sum / TRIALS;
+        uint64_t parallel_quick_sort_time_avg = parallel_quick_sort_time_sum / TRIALS;
 
-        int64_t diff = (serial_quick_sort_time_sum / 3) - (parallel_quick_sort_time_sum / 3);
-        double perc = (diff / (double) (serial_quick_sort_time_sum / 3)) * 100;
+        printf("Serial Average: %lu Ticks\n", serial_quick_sort_time_avg);
+        printf("Parallel Average: %lu Ticks\n", parallel_quick_sort_time_avg);
+
+        int64_t diff = serial_quick_sort_time_avg - parallel_quick_sort_time_avg;
+        double perc = (diff / (double) serial_quick_sort_time_avg) * 100;
         printf("Difference (Serial - Parallel): %ld Ticks\n", diff);
         printf("Percentage Difference: %.2f%%\n", perc);
 
@@ -228,7 +233,7 @@ void perform_quick_sort_experiments() {
     printf("-----------------------------\n");
     printf("UNIFORM DATA DISTRIBUTION\n");
     printf("-----------------------------\n");
-    while (size <= 10000000) {
+    while (size <= max_size) {
 
         uint64_t serial_quick_sort_time_sum = 0;
         uint64_t parallel_quick_sort_time_sum = 0;
@@ -236,7 +241,7 @@ void perform_quick_sort_experiments() {
         printf("Array Length: %ld\n", size);
 
         /* Run 3 Trials */
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < TRIALS; i++) {
             uint64_t start;
             uint64_t end;
             uint64_t serial_quick_sort_time; 
@@ -275,18 +280,20 @@ void perform_quick_sort_experiments() {
             free(sorted_arr2);
         }
 
-        printf("Serial Average: %lu Ticks\n", serial_quick_sort_time_sum / 3);
-        printf("Parallel Average: %lu Ticks\n", parallel_quick_sort_time_sum / 3);
-        
-        int64_t diff = (serial_quick_sort_time_sum / 3) - (parallel_quick_sort_time_sum / 3);
-        double perc = (diff / (double) (serial_quick_sort_time_sum / 3)) * 100;
+        uint64_t serial_quick_sort_time_avg = serial_quick_sort_time_sum / TRIALS;
+        uint64_t parallel_quick_sort_time_avg = parallel_quick_sort_time_sum / TRIALS;
+
+        printf("Serial Average: %lu Ticks\n", serial_quick_sort_time_avg);
+        printf("Parallel Average: %lu Ticks\n", parallel_quick_sort_time_avg);
+
+        int64_t diff = serial_quick_sort_time_avg - parallel_quick_sort_time_avg;
+        double perc = (diff / (double) serial_quick_sort_time_avg) * 100;
         printf("Difference (Serial - Parallel): %ld Ticks\n", diff);
         printf("Percentage Difference: %.2f%%\n", perc);
 
         size *= 10;
         printf("----------------------------------------------------------\n");
     }
-
 
 }
 
