@@ -300,67 +300,6 @@ void perform_merge_sort_experiments() {
 
 }
 
-void perform_merge_sort_experiments_old() {
-    size_t size = 10;
-
-    while (size <= 100000000) {
-        printf("Array Length: %ld\n", size);
-
-        for (int i = 0; i < 3; i++) {
-            printf("Trial %d\n", i + 1);
-
-            uint32_t *sorted_arr1 = malloc(size * sizeof(uint32_t));
-            uint32_t *sorted_arr2 = malloc(size * sizeof(uint32_t));
-            uint32_t *temp = malloc(size * sizeof(uint32_t));
-
-            if (!sorted_arr1 || !sorted_arr2 || !temp) {
-                perror("Memory allocation failed");
-                free(sorted_arr1);
-                free(sorted_arr2);
-                free(temp);
-                return;
-            }
-
-            populate_array(sorted_arr1, sorted_arr2, size);
-
-            uint64_t start = rdtsc();
-            merge_sort(sorted_arr1, 0, size - 1, temp);
-            uint64_t end = rdtsc();
-            uint64_t serial_time = end - start;
-
-            if (is_sorted(sorted_arr1, size))
-                printf("Serial: %ld Ticks\n", serial_time);
-            else
-                printf("Serial Merge Sort did not sort correctly\n");
-
-            start = rdtsc();
-            parallel_merge_sort(sorted_arr2, 0, size - 1, temp);
-            end = rdtsc();
-            uint64_t parallel_time = end - start;
-
-            if (is_sorted(sorted_arr2, size))
-                printf("Parallel: %ld Ticks\n", parallel_time);
-            else
-                printf("Parallel Merge Sort did not sort correctly\n");
-
-            int64_t diff = serial_time - parallel_time;
-            double perc = (diff / (double)serial_time) * 100;
-
-            printf("Difference (Serial - Parallel): %ld Ticks\n", diff);
-            printf("Percentage Difference: %.2f%%\n", perc);
-            printf("---------------------------------------\n");
-
-            free(sorted_arr1);
-            free(sorted_arr2);
-            free(temp);
-        }
-
-        size *= 10;
-        printf("----------------------------------------------------------\n");
-        printf("----------------------------------------------------------\n");
-    }
-}
-
 int main() {
     perform_merge_sort_experiments();
     return 0;
