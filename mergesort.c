@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <time.h>
 
-#define THREAD_THRESHOLD 100000
+#define THREAD_THRESHOLD 10000
 
 typedef struct {
     uint32_t* a;
