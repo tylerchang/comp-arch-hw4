@@ -171,7 +171,6 @@ void perform_merge_sort_experiments() {
 
         printf("Array Length: %ld\n", size);
 
-        /* Run 3 Trials */
         for (int i = 0; i < TRIALS; i++) {
             uint64_t start;
             uint64_t end;
@@ -243,7 +242,6 @@ void perform_merge_sort_experiments() {
 
         printf("Array Length: %ld\n", size);
 
-        /* Run 3 Trials */
         for (int i = 0; i < TRIALS; i++) {
             uint64_t start;
             uint64_t end;
