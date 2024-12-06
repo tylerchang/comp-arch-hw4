@@ -28,19 +28,19 @@ class Normal:
             for num in samples:
                 file.write(str(num) + '\n')
         
-        # plt.figure(figsize=(10, 6))
-        # plt.hist(samples, bins=30, density=True, alpha=0.6, color='blue', label='Sample Histogram')
+        plt.figure(figsize=(10, 6))
+        plt.hist(samples, bins=30, density=True, alpha=0.6, color='blue', label='Sample Histogram')
 
-        # x = sorted(samples)
-        # pdf = stats.norm.pdf(x, loc=self.mean, scale=self.var**0.5)
-        # plt.plot(x, pdf, 'r-', lw=2, label='True Distribution')
+        x = sorted(samples)
+        pdf = stats.norm.pdf(x, loc=self.mean, scale=self.var**0.5)
+        plt.plot(x, pdf, 'r-', lw=2, label='True Distribution')
 
-        # plt.title(f"Histogram and PDF of Generated Samples\n(Mean={self.mean}, Variance={self.var})")
-        # plt.xlabel("Value")
-        # plt.ylabel("Density")
-        # plt.legend()
-        # plt.grid(True)
-        # plt.show()
+        plt.title(f"Histogram and PDF of Generated Samples\n(Mean={self.mean}, Variance={self.var})")
+        plt.xlabel("Value")
+        plt.ylabel("Density")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
 
 
 class SkewNorm:
@@ -53,7 +53,7 @@ class SkewNorm:
         with open(fname, 'w') as file:
             samples = stats.skewnorm.rvs(a=self.skew, loc=self.mean, scale=self.var**0.5, size=N)
             for num in samples:
-                file.write(str(num) + '\n')
+                file.write(str(round(num)) + '\n')
         
         plt.figure(figsize=(10, 6))
         plt.hist(samples, bins=30, density=True, alpha=0.6, color='blue', label='Sample Histogram')
@@ -73,7 +73,8 @@ class SkewNorm:
 if __name__ == '__main__':
     # uni_dist = Uniform(0, 10)
     # uni_dist.write_samples(10000, 'uniform10.txt')
-    # norm_dist = Normal(500, 50)
-    # norm_dist.write_samples(10000, 'norm500.txt')
-    skew_dist = SkewNorm(500, 100, 5)
-    skew_dist.write_samples(100000, 'skewnorm5.txt')
+    norm_dist = Normal(500, 100)
+    norm_dist.write_samples(100000, 'norm.txt')
+    # skew = 9
+    # skew_dist = SkewNorm(500, 100, skew)
+    # skew_dist.write_samples(100000, f'skewnorm{skew}.txt')
