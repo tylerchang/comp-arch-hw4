@@ -75,6 +75,6 @@ if __name__ == '__main__':
     # uni_dist.write_samples(10000, 'uniform10.txt')
     norm_dist = Normal(500, 1500)
     norm_dist.write_samples(100000, 'data/skewnormhighvar0.txt')
-    # for skew in range(1, 12, 3):
-    #     skew_dist = SkewNorm(500, 1500, skew)
-    #     skew_dist.write_samples(100000, f'data/skewnormhighvar{skew}.txt')
+    for skew in range(1, 10):
+        skew_dist = SkewNorm(500, 1500, skew)
+        skew_dist.write_samples(100000, f'data/skewnormhighvar{skew}.txt')
