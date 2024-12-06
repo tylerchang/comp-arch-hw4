@@ -26,7 +26,7 @@ class Normal:
         with open(fname, 'w') as file:
             samples = stats.norm.rvs(loc=self.mean, scale=self.var**0.5, size=N)
             for num in samples:
-                file.write(str(num) + '\n')
+                file.write(str(round(num)) + '\n')
         
         plt.figure(figsize=(10, 6))
         plt.hist(samples, bins=30, density=True, alpha=0.6, color='blue', label='Sample Histogram')
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     # uni_dist = Uniform(0, 10)
     # uni_dist.write_samples(10000, 'uniform10.txt')
     norm_dist = Normal(500, 100)
-    norm_dist.write_samples(100000, 'norm.txt')
+    norm_dist.write_samples(100000, 'skewnorm0.txt')
     # skew = 9
     # skew_dist = SkewNorm(500, 100, skew)
     # skew_dist.write_samples(100000, f'skewnorm{skew}.txt')
