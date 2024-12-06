@@ -62,7 +62,7 @@ class SkewNorm:
         pdf = stats.skewnorm.pdf(x, a=self.skew, loc=self.mean, scale=self.var**0.5)
         plt.plot(x, pdf, 'r-', lw=2, label='True Distribution')
 
-        plt.title(f"Histogram and PDF of Generated Samples\n(Mean={self.mean}, Variance={self.var})")
+        plt.title(f"Histogram and PDF of Generated Samples\n(Mean={self.mean}, Variance={self.var}, Skew={self.skew})")
         plt.xlabel("Value")
         plt.ylabel("Density")
         plt.legend()
